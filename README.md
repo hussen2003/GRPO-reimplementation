@@ -76,3 +76,27 @@ Therefore, the percentage of the entire students enrolled in hip-hop dance is 12
 60
 </answer>
 ```
+## Training Results
+
+### Loss and Reward Curves
+
+<p float="left">
+  <img src="train_loss.png" width="45%" />
+  <img src="train_reward.png" width="45%" />
+</p>
+
+### Reward Component Contributions
+
+<p float="left">
+  <img src="train_rewards_correctness_reward_func.png" width="45%" />
+  <img src="train_rewards_int_reward_func.png" width="45%" />
+</p>
+
+<p float="left">
+  <img src="train_rewards_soft_format_reward_func.png" width="45%" />
+  <img src="train_rewards_strict_format_reward_func.png" width="45%" />
+</p>
+
+<p float="left">
+  <img src="train_rewards_xmlcount_reward_func_mean.png" width="45%" />
+</p>
