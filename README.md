@@ -26,14 +26,76 @@ Install required packages:
 ```bash
 pip install torch transformers trl datasets accelerate tqdm regex
 ```
+## Usage
 
-# Sample Prompt/Response
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-## Prompt:
+# System prompt
+SYSTEM_PROMPT = """
+Respond in the following format:
+<reasoning>
+...
+</reasoning>
+<answer>
+...
+</answer>
+"""
+
+# Question / prompt
+question = "What is 2 + 2?"
+
+# Load tokenizer and model
+model_path = "Hpremier/Qwen-0.5B-Instruct-gsm8k-GRPO"
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = model.to(device)
+
+tokenizer.pad_token = tokenizer.eos_token
+tokenizer.padding_side = "left"
+
+# Build chat input
+chat_prompt = [
+    {"role": "system", "content": SYSTEM_PROMPT},
+    {"role": "user", "content": question}
+]
+
+# Apply chat template
+inputs = tokenizer.apply_chat_template(
+    chat_prompt,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt"
+).to(device)
+
+# Generate output
+outputs = model.generate(**inputs, max_new_tokens=300)
+decoded = tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+
+# Show result
+print(decoded)
+```
+### output:
+```text
+<reasoning>
+2 + 2 equals 4.
+</reasoning>
+<answer>
+4
+</answer>
+```
+
+
+## Sample Prompt/Response
+
+### Prompt:
 ```text
 In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the remaining enrolled in jazz dance, and the rest enrolled in hip-hop dance. What percentage of the entire students enrolled in hip-hop dance?
 ```
-## Base Model Output (Qwen2.5-0.5B-Instruct):
+### Base Model Output (Qwen2.5-0.5B-Instruct):
 ```text
 In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the remaining enrolled in jazz dance, and the rest enrolled in hip-hop dance. What percentage of the entire students enrolled in hip-hop dance?
 assistant
@@ -62,7 +124,7 @@ Let's break down the problem step by step:
    - To find the percentage of students enrolled in hip-hop dance, divide the number of students enrolled
 ```
 
-## GRPO Trained Output:
+### GRPO Trained Output:
 ```text
 <reasoning>
 There are 20 students in total.
